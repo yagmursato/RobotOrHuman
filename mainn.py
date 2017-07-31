@@ -28,50 +28,43 @@ frame_x=frame["text"]
 frame_y=frame["status"]
 
 
-vect = TfidfVectorizer(min_df=1, stop_words='english')
+vect = TfidfVectorizer(min_df=1)
 
 
 x_train, x_test, y_train, y_test = train_test_split(frame_x,frame_y,test_size=0.2,random_state=4)
 
-x_trainvect = vect.fit_transform(["iyi ki geldin misim","zsdvb"])
+x_trainvect = vect.fit_transform(x_train)
 
-
-
-x_trainvect.toarray()
-
-vect.get_feature_names()
-
-vect1 = TfidfVectorizer(min_df=1, stop_words='english')
+vect1 = TfidfVectorizer(min_df=1)
 
 x_trainvect=vect1.fit_transform(x_train)
-a = x_trainvect.toarray()
-vect1.inverse_transform(a[0])
-print(x_train.iloc[0])
+
 
 mnb = MultinomialNB()
 
 y_train=y_train.astype('int')
+test = []
+human_test = 0
+robot_test = 0
+mnb.fit(x_trainvect,y_train)
 
-print(mnb.fit(x_trainvect,y_train))
+with open("test.txt","r") as f:
+    for line in f:
+        test.append(line)
 
-x_testvect = vect1.transform(["tüm türkiyeyi dolaşmış gibi hissediyorum ama asla çorluya gidemiyorum bilet fiyatları 25 olmuş"])
-pred = mnb.predict(x_testvect)
+for i in range(len(test)):
+    x_testvect = vect1.transform([test[i]])
+    pred = mnb.predict(x_testvect)
+    if (pred[0]==1):
+        human_test += 1
+    else:
+        robot_test += 1
 
-print(pred)
-actual =  np.array(y_test)
-count=0
-for i in range(len(pred)):
-    if pred[i]==actual[i]:
-        count=count+1
-
-print(count)
+if (human_test>robot_test):
+    print("Bu hesap insana aittir.")
+else:
+    print("Bu hesap bot hesaptır.")
 
 
-
-"""vect.fit(data)
-x = vect.transform(data["text"])
-features = vect.get_feature_names()
-datas = pandas.DataFrame(x.toarray(),columns=vect.get_feature_names())
-print(datas["text"])
-"""
-
+print(human_test)
+print(robot_test)
